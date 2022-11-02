@@ -2,7 +2,7 @@ package be.gkonen.calculator.ui.theme
 
 
 //Based on "https://gist.github.com/sczerwinski/f47fa93e37f4f9263562e86b60f1681f"
-enum class MaterialColor(val tones: Map<Int,Int> = emptyMap(), val singleColor: Long? ) {
+enum class MaterialColor(val tones: Map<Int,Int> = emptyMap(), val singleColor: Int? ) {
     Primary(
         tones = mapOf(
             10 to 0x001947,
