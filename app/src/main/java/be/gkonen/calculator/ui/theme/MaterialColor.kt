@@ -2,7 +2,7 @@ package be.gkonen.calculator.ui.theme
 
 
 //Based on "https://gist.github.com/sczerwinski/f47fa93e37f4f9263562e86b60f1681f"
-enum class MaterialColor(val tones: Map<Int,Int> = emptyMap(), val singleColor: Int? ) {
+enum class MaterialColor(val tones: Map<Int,Int> = emptyMap(), val singleColor: Long? ) {
     Primary(
         tones = mapOf(
             10 to 0x001947,
@@ -29,7 +29,7 @@ enum class MaterialColor(val tones: Map<Int,Int> = emptyMap(), val singleColor: 
             80 to 0x68dca7,
             90 to 0x85f8c2
         ),
-        singleColor = 0x26a474
+        singleColor = 0xff26a474
     ),
     Tertiary(
         tones = mapOf(
@@ -71,7 +71,7 @@ enum class MaterialColor(val tones: Map<Int,Int> = emptyMap(), val singleColor: 
             80 to 0xa1c9ff,
             90 to 0xd3e4ff
         ),
-        singleColor = 0x161A20
+        singleColor = 0xff161A20
     ),
     NeutralVariant(
         tones = mapOf(
@@ -91,12 +91,16 @@ enum class MaterialColor(val tones: Map<Int,Int> = emptyMap(), val singleColor: 
     private val COLOR_BLACK = 0x000000
     private val COLOR_WHITE = 0xFFFFFF
 
-    private fun getTone(tone: Int): Int? =
-        if (tones.isEmpty()) null
-        else tones[tone] ?: interpolate(tones, tone)
+    private fun getTone(tone: Int): Long? =
+        if (tones.isEmpty() ) null
+        else if(tones[tone] == null) {
+            (0xFF000000 or interpolate(tones, tone).toLong())
+        } else {
+            (0xFF000000 or tones[tone]!!.toLong())
+        }
 
-    operator fun get(tone: Int): Int = getTone(tone) ?: COLOR_BLACK
-    operator fun invoke(): Int = singleColor ?: getTone(50) ?: COLOR_BLACK
+    operator fun get(tone: Int): Long = getTone(tone) ?: (0xFF000000 or COLOR_BLACK.toLong() )
+    operator fun invoke(): Long = 0xFF000000 or (singleColor ?: getTone(50) ?: COLOR_BLACK).toLong()
 
     private fun interpolate(tones: Map<Int, Int>, tone: Int): Int {
         val lowTone = tones.keys.filter { tone >= it }.maxOrNull() ?: 0
