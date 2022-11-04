@@ -88,21 +88,26 @@ enum class MaterialColor(val tones: Map<Int,Int> = emptyMap(), val singleColor: 
         singleColor = null
     );
 
-    private val COLOR_BLACK = 0x000000
-    private val COLOR_WHITE = 0xFFFFFF
+    private val colorBlack = 0x000000
+    private val colorWhite = 0xFFFFFF
+    private val alpha = 0xFF000000
 
-    private fun getTone(tone: Int): Int? =
-        if (tones.isEmpty()) null
-        else tones[tone] ?: interpolate(tones, tone)
+    private fun getTone(tone: Int): Long? =
+        if (tones.isEmpty() ) null
+        else if(tones[tone] == null) {
+            (alpha or interpolate(tones, tone).toLong())
+        } else {
+            (alpha or tones[tone]!!.toLong())
+        }
 
-    operator fun get(tone: Int): Int = getTone(tone) ?: COLOR_BLACK
-    operator fun invoke(): Int = singleColor ?: getTone(50) ?: COLOR_BLACK
+    operator fun get(tone: Int): Long = getTone(tone) ?: (alpha or colorBlack.toLong() )
+    operator fun invoke(): Long = alpha or (singleColor ?: getTone(50) ?: colorBlack).toLong()
 
     private fun interpolate(tones: Map<Int, Int>, tone: Int): Int {
         val lowTone = tones.keys.filter { tone >= it }.maxOrNull() ?: 0
         val highTone = tones.keys.filter { tone <= it }.minOrNull() ?: 100
-        val lowColor = tones[lowTone] ?: COLOR_WHITE
-        val highColor = tones[highTone] ?: COLOR_BLACK
+        val lowColor = tones[lowTone] ?: colorWhite
+        val highColor = tones[highTone] ?: colorBlack
         return colorInt(
             interpolateChannel(lowTone, highTone, tone, lowColor.red(), highColor.red()),
             interpolateChannel(lowTone, highTone, tone, lowColor.green(), highColor.green()),
