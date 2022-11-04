@@ -24,8 +24,8 @@ object KeyboardHelper {
     private val idMap = mapOf(
        //First Line
        0 to ButtonConfig.AC,
-       1 to ButtonConfig.PLUS_MINUS,
-       2 to ButtonConfig.PERCENT,
+       1 to ButtonConfig.PERCENT,
+       2 to ButtonConfig.PLUS_MINUS,
        3 to ButtonConfig.DIVIDE,
        //Second Line
        4 to ButtonConfig.B7,
@@ -50,11 +50,13 @@ object KeyboardHelper {
    )
 
     enum class ButtonConfig(val value: String? = null, val iconId: Int? = null) {
-        AC("AC"), PLUS_MINUS("+/-"), PERCENT("%"), POINT("."),
-        ADD(iconId = R.drawable.ic_math_add ),
+        AC("AC"), POINT("."),
+        PLUS_MINUS(iconId = R.drawable.ic_math_plusless),
+        PERCENT(iconId = R.drawable.ic_math_percent),
+        ADD(iconId = R.drawable.ic_math_plus ),
         MINUS(iconId = R.drawable.ic_math_minus),
         DIVIDE(iconId = R.drawable.ic_math_divide),
-        MULTIPLY(iconId = R.drawable.ic_math_multiply),
+        MULTIPLY(iconId = R.drawable.ic_math_multiplication),
         EQUAL(iconId = R.drawable.ic_math_equal),
         B0("0"), B1("1"), B2("2"), B3("3"), B4("4"), B5("5"), B6("6"), B7("7"), B8("8"), B9("9")
     }
