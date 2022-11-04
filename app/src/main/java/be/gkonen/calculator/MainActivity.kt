@@ -42,10 +42,10 @@ class MainActivity : ComponentActivity() {
 fun Keyboard() {
     val spaceBetween = 2.dp
     val sizeContent = 24.dp
-    val context = LocalContext.current
     val nbLine = 4
     val nbColumn = 4
 
+    val context = LocalContext.current
     val buttonModifier = Modifier.height(IntrinsicSize.Min)
     val iconColor = MaterialTheme.colorScheme.onSurface
 
@@ -89,7 +89,6 @@ fun Keyboard() {
                     }
                 }
             }
-
         }
     }
 }
