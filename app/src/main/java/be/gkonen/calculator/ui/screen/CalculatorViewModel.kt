@@ -34,6 +34,11 @@ class CalculatorViewModel @Inject constructor(): ViewModel() {
         when(config) {
             KeyboardHelper.ButtonConfig.AC -> _information.value = ""
             KeyboardHelper.ButtonConfig.POINT -> {
+                if("." in _information.value) {
+
+                } else {
+                    _information.value += "."
+                }
             }
             KeyboardHelper.ButtonConfig.PLUS_MINUS -> {
 
