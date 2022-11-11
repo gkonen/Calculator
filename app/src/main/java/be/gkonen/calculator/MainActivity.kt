@@ -1,6 +1,5 @@
 package be.gkonen.calculator
 
-import android.content.Context
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -8,6 +7,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -15,7 +15,11 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import be.gkonen.calculator.ui.screen.KeyboardHelper
+import androidx.lifecycle.viewmodel.compose.viewModel
+import be.gkonen.calculator.domain.KeyboardHelper
+import be.gkonen.calculator.model.UIEvent
+import be.gkonen.calculator.model.UIState
+import be.gkonen.calculator.ui.screen.CalculatorViewModel
 import be.gkonen.calculator.ui.theme.CalculatorTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -49,6 +53,18 @@ fun Keyboard() {
     val buttonModifier = Modifier.height(IntrinsicSize.Min)
     val iconColor = MaterialTheme.colorScheme.onSurface
 
+    val viewModel = viewModel<CalculatorViewModel>()
+    LaunchedEffect(Unit) {
+        viewModel.uiState.collect { state ->
+            when(state) {
+                UIState.Idle -> {}
+                is UIState.Notification -> {
+                    Toast.makeText(context,state.message, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -68,23 +84,24 @@ fun Keyboard() {
                         Button(
                             modifier = buttonModifier.weight(KeyboardHelper.getWeight(valueId)),
                             shape = KeyboardHelper.getShape(valueId),
-                            onClick = { onClickButton("value", context) }) {
+                            onClick = {
+                                viewModel.onEvent(UIEvent.ButtonPressed(config))
+                            }) {
 
-                            config.value?.let { value ->
-                                Text(text = value,
-                                    fontSize = with(LocalDensity.current) { sizeContent.toSp() })
-                            }
-                            config.iconId?.let { id ->
-                                Icon(
-                                    imageVector = ImageVector.vectorResource(id = id),
-                                    contentDescription = null,
-                                    tint = iconColor,
-                                    modifier = Modifier
-                                        .size(sizeContent)
-                                        .aspectRatio(1f)
-                                )
-                            }
-
+                                config.value?.let { value ->
+                                    Text(text = value,
+                                        fontSize = with(LocalDensity.current) { sizeContent.toSp() })
+                                }
+                                config.iconId?.let { id ->
+                                    Icon(
+                                        imageVector = ImageVector.vectorResource(id = id),
+                                        contentDescription = null,
+                                        tint = iconColor,
+                                        modifier = Modifier
+                                            .size(sizeContent)
+                                            .aspectRatio(1f)
+                                    )
+                                }
                         }
                     }
                 }
@@ -99,10 +116,4 @@ fun DefaultPreview() {
     CalculatorTheme {
         Keyboard()
     }
-}
-
-fun onClickButton(input: String, context: Context) = run {
-    Toast.makeText(context,
-    "vous avez appuyé sur $input",
-        Toast.LENGTH_SHORT).show()
 }
