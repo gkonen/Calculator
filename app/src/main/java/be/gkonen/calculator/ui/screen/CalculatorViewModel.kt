@@ -15,7 +15,7 @@ class CalculatorViewModel @Inject constructor(): ViewModel() {
     private var _uiState = MutableStateFlow<UIState>(UIState.Idle)
     val uiState : StateFlow<UIState> = _uiState
 
-    private var _information = MutableStateFlow<String>("")
+    private var _information = MutableStateFlow("")
     val information : StateFlow<String> = _information
 
     fun onEvent(event: UIEvent) {
@@ -34,9 +34,9 @@ class CalculatorViewModel @Inject constructor(): ViewModel() {
         when(config) {
             KeyboardHelper.ButtonConfig.AC -> _information.value = ""
             KeyboardHelper.ButtonConfig.POINT -> {
-                if("." in _information.value) {
-
-                } else {
+                if(_information.value.isBlank()) {
+                    _information.value = "0."
+                } else if("." !in _information.value) {
                     _information.value += "."
                 }
             }
@@ -72,7 +72,6 @@ class CalculatorViewModel @Inject constructor(): ViewModel() {
             KeyboardHelper.ButtonConfig.B8 -> _information.value += "8"
             KeyboardHelper.ButtonConfig.B9 -> _information.value += "9"
         }
-
     }
 
 }
