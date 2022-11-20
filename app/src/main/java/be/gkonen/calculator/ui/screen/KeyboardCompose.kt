@@ -21,32 +21,19 @@ import be.gkonen.calculator.model.UIState
 
 
 @Composable
-fun Keyboard() {
+fun Keyboard(onEvent: (UIEvent) -> Unit) {
     val spaceBetween = 2.dp
     val sizeContent = 24.dp
     val nbLine = 4
     val nbColumn = 4
 
-    val context = LocalContext.current
     val buttonModifier = Modifier.height(IntrinsicSize.Min)
     val iconColor = MaterialTheme.colorScheme.onSurface
-
-    val viewModel = viewModel<CalculatorViewModel>()
-    LaunchedEffect(Unit) {
-        viewModel.uiState.collect { state ->
-            when(state) {
-                UIState.Idle -> {}
-                is UIState.Notification -> {
-                    Toast.makeText(context,state.message, Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
-    }
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 8.dp, end = 8.dp),
+            .padding(start = 8.dp, end = 8.dp, top = 4.dp, bottom = 4.dp),
         Arrangement.spacedBy(spaceBetween)
     ) {
         for(line in 0..nbLine) {
@@ -63,7 +50,7 @@ fun Keyboard() {
                             modifier = buttonModifier.weight(KeyboardHelper.getWeight(valueId)),
                             shape = KeyboardHelper.getShape(valueId),
                             onClick = {
-                                viewModel.onEvent(UIEvent.ButtonPressed(config))
+                                onEvent(UIEvent.ButtonPressed(config))
                             }) {
 
                             config.value?.let { value ->
