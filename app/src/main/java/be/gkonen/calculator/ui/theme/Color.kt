@@ -23,12 +23,12 @@ val light_onError = Color(MaterialColor.Error[100])
 val light_errorContainer = Color(MaterialColor.Error[90])
 val light_onErrorContainer = Color(MaterialColor.Error[10])
 
-val light_surface = Color(MaterialColor.Neutral[99])
-val light_onSurface = Color(MaterialColor.Neutral[10])
-val light_surfaceVariant = Color(MaterialColor.NeutralVariant[90])
-val light_onSurfaceVariant = Color(MaterialColor.NeutralVariant[30])
+val light_surface = Color(0xFF242933)
+val light_onSurface = Color(0xFFFFFFFF)
+val light_surfaceVariant = Color(0xFF3C434B) //Color(MaterialColor.NeutralVariant[90])
+val light_onSurfaceVariant = Color(0xFFC7DDF9)
 
-val light_background = Color(MaterialColor.Neutral[99])
+val light_background = Color(0xFF161A20)
 val light_onBackground = Color(MaterialColor.Neutral[10])
 
 val light_outline = Color(MaterialColor.NeutralVariant[50])
@@ -39,6 +39,9 @@ val light_inverseSurface = Color(MaterialColor.Neutral[20])
 val light_inverseOnSurface = Color(MaterialColor.Neutral[95])
 val light_inversePrimary = Color(MaterialColor.Primary[80])
 val light_scrim = Color(MaterialColor.Neutral[10])
+
+//Personnal Color
+val light_buttonVariant = Color(0xFF0060E5)
 //endregion
 
 //region DARKCOLOR

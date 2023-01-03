@@ -63,6 +63,8 @@ dependencies {
     //material 3
     implementation "androidx.compose.material3:material3:$material_3"
     implementation "androidx.compose.material3:material3-window-size-class:$material_3"
+    // system bars customization
+    implementation "com.google.accompanist:accompanist-systemuicontroller:0.28.0"
 
     // Hilt
     implementation "com.google.dagger:hilt-android:$hilt_version"

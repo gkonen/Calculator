@@ -4,17 +4,21 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import be.gkonen.calculator.model.UIState
 import be.gkonen.calculator.ui.screen.CalculatorViewModel
@@ -57,23 +61,93 @@ fun PrincipalScreen(viewModel: CalculatorViewModel = viewModel()) {
         }
     }
 
-    Column {
-        Text(text = "coucou", textAlign = TextAlign.End)
-        Spacer(modifier = Modifier.fillMaxWidth().height(8.dp))
-        OperationSurface(viewModel = viewModel)
-        Keyboard(viewModel::onEvent)
+    Column(modifier = Modifier.fillMaxHeight(),
+        verticalArrangement = Arrangement.Bottom) {
+
+        Box(modifier = Modifier
+            .weight(1f)
+            .background(MaterialTheme.colorScheme.background)) {
+        Column(modifier = Modifier.fillMaxHeight(),
+            verticalArrangement = Arrangement.SpaceAround) {
+
+                PreviousOperationSurface()
+            /*
+                Spacer(modifier = Modifier
+                    .fillMaxWidth()
+                    .height(8.dp)
+                )
+            */
+
+                ResultSurface(viewModel = viewModel)
+            /*
+                Spacer(modifier = Modifier
+                    .fillMaxWidth()
+                    .height(8.dp))
+            */
+
+                OperationSurface(viewModel = viewModel)
+            }
+        }
+
+        Box(modifier = Modifier
+            .weight(1f, fill = true)
+            .background(color = MaterialTheme.colorScheme.background)) {
+            Keyboard(viewModel::onEvent)
+        }
+    }
+}
+@Composable
+fun PreviousOperationSurface() {
+    Box(modifier = Modifier.fillMaxWidth(),
+        contentAlignment = Alignment.CenterEnd) {
+
+        Surface(modifier = Modifier.height(54.dp)
+            .padding(top = 16.dp, bottom = 16.dp, end = 8.dp),
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.surfaceVariant) {
+
+            Text(modifier = Modifier.padding(start = 12.dp, end = 12.dp)
+                .wrapContentSize(align = Alignment.Center),
+                text = "Old Result",
+                textAlign = TextAlign.End,
+                color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+    }
+}
+
+@Composable
+fun ResultSurface(viewModel: CalculatorViewModel) {
+    Surface(modifier = Modifier
+        .fillMaxWidth()
+        .height(64.dp)
+        .padding(top = 4.dp, bottom = 4.dp),
+        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0f)) {
+
+        Box(contentAlignment = Alignment.CenterEnd) {
+            Text(modifier = Modifier.padding(start = 8.dp, end = 8.dp),
+                text = "Result",
+                textAlign = TextAlign.End,
+                fontSize = 48.sp,
+                color = MaterialTheme.colorScheme.onSurface)
+        }
     }
 }
 
 @Composable
 fun OperationSurface(viewModel: CalculatorViewModel) {
-    Surface(modifier = Modifier.fillMaxWidth().padding(top = 4.dp, bottom = 4.dp),
-        color = MaterialTheme.colorScheme.onSurfaceVariant) {
+    Surface(modifier = Modifier
+        .fillMaxWidth()
+        .height(52.dp)
+        .padding(top = 4.dp, bottom = 4.dp),
+        color = MaterialTheme.colorScheme.surface) {
 
-        Text(modifier = Modifier.padding(start = 8.dp, end = 8.dp),
-            text = "1000 + 323",
-            textAlign = TextAlign.End,
-            color = MaterialTheme.colorScheme.onSurface)
+        Box(modifier = Modifier.fillMaxHeight(), contentAlignment = Alignment.CenterEnd) {
+            Text(modifier = Modifier.padding(start = 8.dp, end = 8.dp),
+                text = "1000 + 323",
+                fontSize = 32.sp,
+                textAlign = TextAlign.End,
+                color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
     }
 }
 

@@ -5,6 +5,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 private val DarkColorPalette = darkColorScheme(
     primary = dark_primary,
@@ -76,6 +78,14 @@ fun CalculatorTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Compos
         DarkColorPalette
     } else {
         LightColorPalette
+    }
+
+    val systemUiController = rememberSystemUiController()
+    SideEffect{
+        systemUiController.setStatusBarColor(
+            color = colorScheme.background,
+            darkIcons = darkTheme
+        )
     }
 
     MaterialTheme(
