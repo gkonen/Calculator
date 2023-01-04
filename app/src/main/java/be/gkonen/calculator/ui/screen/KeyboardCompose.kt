@@ -1,57 +1,41 @@
 package be.gkonen.calculator.ui.screen
 
-import android.widget.Toast
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import be.gkonen.calculator.domain.KeyboardHelper
 import be.gkonen.calculator.model.UIEvent
-import be.gkonen.calculator.model.UIState
+import be.gkonen.calculator.ui.theme.light_buttonVariant
 
-
+@Preview(showBackground = true)
 @Composable
-fun Keyboard() {
+fun Keyboard(onEvent: (UIEvent) -> Unit = { _ -> }) {
     val spaceBetween = 2.dp
     val sizeContent = 24.dp
     val nbLine = 4
     val nbColumn = 4
 
-    val context = LocalContext.current
-    val buttonModifier = Modifier.height(IntrinsicSize.Min)
-    val iconColor = MaterialTheme.colorScheme.onSurface
-
-    val viewModel = viewModel<CalculatorViewModel>()
-    LaunchedEffect(Unit) {
-        viewModel.uiState.collect { state ->
-            when(state) {
-                UIState.Idle -> {}
-                is UIState.Notification -> {
-                    Toast.makeText(context,state.message, Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
-    }
+    val buttonModifier = Modifier.fillMaxHeight() //height(IntrinsicSize.Max)
+    val iconColor = MaterialTheme.colorScheme.onSurfaceVariant
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 8.dp, end = 8.dp),
+            .fillMaxHeight()
+            .padding(start = 8.dp, end = 8.dp, top = 4.dp, bottom = 16.dp),
         Arrangement.spacedBy(spaceBetween)
     ) {
         for(line in 0..nbLine) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
                 horizontalArrangement = Arrangement.spacedBy(spaceBetween)
             )  {
                 for(column in 0 until nbColumn) {
@@ -59,11 +43,22 @@ fun Keyboard() {
 
                     val config = KeyboardHelper[valueId]
                     if( config != null) {
+
+                        val buttonColors = ButtonDefaults.buttonColors(
+                            containerColor = when(config.type) {
+                                KeyboardHelper.ButtonType.OPERATOR -> light_buttonVariant
+                                KeyboardHelper.ButtonType.VALUE -> MaterialTheme.colorScheme.surface
+                                KeyboardHelper.ButtonType.SPECIAL -> MaterialTheme.colorScheme.surfaceVariant
+                            },
+                            contentColor = iconColor
+                        )
                         Button(
-                            modifier = buttonModifier.weight(KeyboardHelper.getWeight(valueId)),
+                            modifier = buttonModifier
+                                .weight(KeyboardHelper.getWeight(valueId)),
+                            colors = buttonColors,
                             shape = KeyboardHelper.getShape(valueId),
                             onClick = {
-                                viewModel.onEvent(UIEvent.ButtonPressed(config))
+                                onEvent(UIEvent.ButtonPressed(config))
                             }) {
 
                             config.value?.let { value ->
