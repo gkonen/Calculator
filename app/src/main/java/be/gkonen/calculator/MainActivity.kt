@@ -10,8 +10,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -48,8 +47,9 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun PrincipalScreen(viewModel: CalculatorViewModel = viewModel()) {
 
-    val context = LocalContext.current
+    val currentOperation by viewModel.information.collectAsState()
 
+    val context = LocalContext.current
     LaunchedEffect(Unit) {
         viewModel.uiState.collect { state ->
             when(state) {
@@ -85,7 +85,7 @@ fun PrincipalScreen(viewModel: CalculatorViewModel = viewModel()) {
                     .height(8.dp))
             */
 
-                OperationSurface(viewModel = viewModel)
+                OperationSurface(currentOperation)
             }
         }
 
@@ -101,12 +101,14 @@ fun PreviousOperationSurface() {
     Box(modifier = Modifier.fillMaxWidth(),
         contentAlignment = Alignment.CenterEnd) {
 
-        Surface(modifier = Modifier.height(54.dp)
+        Surface(modifier = Modifier
+            .height(54.dp)
             .padding(top = 16.dp, bottom = 16.dp, end = 8.dp),
             shape = CircleShape,
             color = MaterialTheme.colorScheme.surfaceVariant) {
 
-            Text(modifier = Modifier.padding(start = 12.dp, end = 12.dp)
+            Text(modifier = Modifier
+                .padding(start = 12.dp, end = 12.dp)
                 .wrapContentSize(align = Alignment.Center),
                 text = "Old Result",
                 textAlign = TextAlign.End,
@@ -134,7 +136,8 @@ fun ResultSurface(viewModel: CalculatorViewModel) {
 }
 
 @Composable
-fun OperationSurface(viewModel: CalculatorViewModel) {
+fun OperationSurface(operation : String) {
+
     Surface(modifier = Modifier
         .fillMaxWidth()
         .height(52.dp)
@@ -143,7 +146,7 @@ fun OperationSurface(viewModel: CalculatorViewModel) {
 
         Box(modifier = Modifier.fillMaxHeight(), contentAlignment = Alignment.CenterEnd) {
             Text(modifier = Modifier.padding(start = 8.dp, end = 8.dp),
-                text = "1000 + 323",
+                text = operation,
                 fontSize = 32.sp,
                 textAlign = TextAlign.End,
                 color = MaterialTheme.colorScheme.onSurfaceVariant)
