@@ -2,18 +2,20 @@ package be.gkonen.calculator.ui.screen
 
 import androidx.lifecycle.ViewModel
 import be.gkonen.calculator.domain.KeyboardHelper
+import be.gkonen.calculator.domain.MemberOperation
 import be.gkonen.calculator.model.UIEvent
 import be.gkonen.calculator.model.UIState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
 @HiltViewModel
 class CalculatorViewModel @Inject constructor(): ViewModel() {
 
     private var _uiState = MutableStateFlow<UIState>(UIState.Idle)
-    val uiState : StateFlow<UIState> = _uiState
+    val uiState : StateFlow<UIState> = _uiState.asStateFlow()
 
     private var _information = MutableStateFlow("")
     val information : StateFlow<String> = _information
@@ -22,19 +24,40 @@ class CalculatorViewModel @Inject constructor(): ViewModel() {
     private var operation: String = ""
     private var secondMember = MemberOperation("")
 
-
     fun onEvent(event: UIEvent) {
         when(event) {
             is UIEvent.ButtonPressed -> {
                 manageButton(event.button)
-                if(event.button.type != KeyboardHelper.ButtonType.VALUE) {
+
+                if(event.button.type == KeyboardHelper.ButtonType.SPECIAL) {
                     _uiState.value = UIState.Notification(
                         "Vous avez appuyé sur ${event.button.name}"
                     )
                 }
             }
         }
+    }
 
+    fun compute(): String {
+        return if(firstMember.isNotEmpty() && secondMember.isNotEmpty()) {
+            when (operation) {
+                "+" -> {
+                    (firstMember + secondMember).toString()
+                }
+                "-" -> {
+                    (firstMember - secondMember ).toString()
+                }
+                "*" -> {
+                     (firstMember * secondMember).toString()
+                }
+                "/" -> {
+                     (firstMember / secondMember).toString()
+                }
+                else -> "NaN"
+            }
+        } else {
+            ""
+        }
     }
 
     private fun updateInformation(newValue: String = "$firstMember $operation $secondMember") {
@@ -76,7 +99,7 @@ class CalculatorViewModel @Inject constructor(): ViewModel() {
                 operation = "*"
             }
             KeyboardHelper.ButtonConfig.EQUAL -> {
-
+                _uiState.value = UIState.ResultDisplay(compute())
             }
             else -> {
                 if (config.type == KeyboardHelper.ButtonType.VALUE) addCharacter(config.value)
@@ -91,35 +114,6 @@ class CalculatorViewModel @Inject constructor(): ViewModel() {
             firstMember += value
         } else {
             secondMember += value
-        }
-
-    }
-
-    private class MemberOperation(var content: String) {
-
-        private var isPositive = true
-
-        fun clear() {
-            isPositive = true
-            content = ""
-        }
-
-        fun inverse() {
-            isPositive = !isPositive
-        }
-
-        operator fun plusAssign(value: String) {
-            content += if(value == "0") {
-                if(content.isBlank()) "" else value
-            } else if(value == ".") {
-                if(content.isBlank()) "0." else "."
-            } else {
-                value
-            }
-        }
-
-        override fun toString(): String {
-            return if(!isPositive) "-$content" else content
         }
     }
 
