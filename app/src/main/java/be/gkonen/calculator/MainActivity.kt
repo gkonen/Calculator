@@ -24,6 +24,7 @@ import be.gkonen.calculator.ui.screen.CalculatorViewModel
 import be.gkonen.calculator.ui.screen.Keyboard
 import be.gkonen.calculator.ui.theme.CalculatorTheme
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.StateFlow
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -51,11 +52,14 @@ fun PrincipalScreen(viewModel: CalculatorViewModel = viewModel()) {
 
     val context = LocalContext.current
     LaunchedEffect(Unit) {
-        viewModel.uiState.collect { state ->
+         viewModel.uiState.collect { state ->
             when(state) {
                 UIState.Idle -> {}
                 is UIState.Notification -> {
                     Toast.makeText(context,state.message, Toast.LENGTH_SHORT).show()
+                }
+                is UIState.ResultDisplay -> {
+                    Toast.makeText(context,"result : ${state.result}", Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -78,7 +82,7 @@ fun PrincipalScreen(viewModel: CalculatorViewModel = viewModel()) {
                 )
             */
 
-                ResultSurface(viewModel = viewModel)
+                ResultSurface(viewModel.uiState)
             /*
                 Spacer(modifier = Modifier
                     .fillMaxWidth()
@@ -118,7 +122,14 @@ fun PreviousOperationSurface() {
 }
 
 @Composable
-fun ResultSurface(viewModel: CalculatorViewModel) {
+fun ResultSurface(uiState: StateFlow<UIState>) {
+
+    val state by uiState.collectAsState()
+    val message = when(state) {
+        is UIState.ResultDisplay -> (state as UIState.ResultDisplay).result
+        else -> ""
+    }
+
     Surface(modifier = Modifier
         .fillMaxWidth()
         .height(64.dp)
@@ -127,7 +138,7 @@ fun ResultSurface(viewModel: CalculatorViewModel) {
 
         Box(contentAlignment = Alignment.CenterEnd) {
             Text(modifier = Modifier.padding(start = 8.dp, end = 8.dp),
-                text = "Result",
+                text = message,
                 textAlign = TextAlign.End,
                 fontSize = 48.sp,
                 color = MaterialTheme.colorScheme.onSurface)
