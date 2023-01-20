@@ -80,16 +80,13 @@ class MemberOperation(private var content: String = "") {
 
     operator fun div(other: MemberOperation): MemberOperation {
         val first = if(value() is Float) value() as Float? else value() as Int?
-        val second = if(other.value() is Float) other.value() as Float? else value() as Int?
+        val second = if(other.value() is Float) other.value() as Float? else other.value() as Int?
 
         if(first == null || second == null) return MemberOperation("")
         if(second == 0) return MemberOperation("NaN")
 
-        val result = if(first is Float || second is Float) {
-            first.toFloat() / second.toFloat()
-        } else {
-            first.toFloat() / second.toInt()
-        }
+        val result = first.toFloat() / second.toFloat()
+
         return MemberOperation(result.toString())
     }
 

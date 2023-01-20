@@ -14,11 +14,14 @@ import javax.inject.Inject
 @HiltViewModel
 class CalculatorViewModel @Inject constructor(): ViewModel() {
 
-    private var _uiState = MutableStateFlow<UIState>(UIState.Idle)
+    private var _uiState = MutableStateFlow<UIState>(UIState.Idle())
     val uiState : StateFlow<UIState> = _uiState.asStateFlow()
 
     private var _information = MutableStateFlow("")
-    val information : StateFlow<String> = _information
+    val information : StateFlow<String> = _information.asStateFlow()
+
+    private var _oldResult = MutableStateFlow("")
+    val oldResult : StateFlow<String>         = _oldResult.asStateFlow()
 
     private var firstMember = MemberOperation("")
     private var operation: String = ""
@@ -27,18 +30,44 @@ class CalculatorViewModel @Inject constructor(): ViewModel() {
     fun onEvent(event: UIEvent) {
         when(event) {
             is UIEvent.ButtonPressed -> {
-                manageButton(event.button)
-
-                if(event.button.type == KeyboardHelper.ButtonType.SPECIAL) {
-                    _uiState.value = UIState.Notification(
-                        "Vous avez appuyé sur ${event.button.name}"
-                    )
+                if(_uiState.value is UIState.ResultDisplay) {
+                    _oldResult.value = (_uiState.value as UIState.ResultDisplay).result
+                    clear()
+                    _uiState.value = UIState.Idle()
+                    if(event.button.type == KeyboardHelper.ButtonType.VALUE) {
+                        manageButton(event.button)
+                    } else if(event.button.type == KeyboardHelper.ButtonType.OPERATOR) {
+                        firstMember = MemberOperation(_oldResult.value)
+                        manageButton(event.button)
+                    }
+                } else {
+                    manageButton(event.button)
+                    if(event.button.type == KeyboardHelper.ButtonType.SPECIAL) {
+                        _uiState.value = UIState.Notification(
+                            "Vous avez appuyé sur ${event.button.name}"
+                        )
+                    }
                 }
+            }
+            is UIEvent.OldResultPressed -> {
+                var newValue = event.oldResult
+                if(_uiState.value is UIState.ResultDisplay) {
+                    newValue = (_uiState.value as UIState.ResultDisplay).result
+                    _oldResult.value = newValue
+                    firstMember = MemberOperation(newValue)
+                    clear()
+                }
+                if(operation.isEmpty()) {
+                    firstMember = MemberOperation(newValue)
+                } else {
+                    secondMember = MemberOperation(newValue)
+                }
+                updateInformation()
             }
         }
     }
 
-    fun compute(): String {
+    private fun compute(): String {
         return if(firstMember.isNotEmpty() && secondMember.isNotEmpty()) {
             when (operation) {
                 "+" -> {
