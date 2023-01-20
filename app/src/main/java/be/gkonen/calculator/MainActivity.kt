@@ -4,14 +4,15 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -20,11 +21,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import be.gkonen.calculator.model.UIEvent
 import be.gkonen.calculator.model.UIState
 import be.gkonen.calculator.ui.screen.CalculatorViewModel
 import be.gkonen.calculator.ui.screen.Keyboard
 import be.gkonen.calculator.ui.theme.CalculatorTheme
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.StateFlow
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -48,14 +51,18 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun PrincipalScreen(viewModel: CalculatorViewModel = viewModel()) {
 
-    val context = LocalContext.current
+    val currentOperation by viewModel.information.collectAsState()
 
+    val context = LocalContext.current
     LaunchedEffect(Unit) {
-        viewModel.uiState.collect { state ->
+         viewModel.uiState.collect { state ->
             when(state) {
-                UIState.Idle -> {}
+                is UIState.Idle -> {}
                 is UIState.Notification -> {
                     Toast.makeText(context,state.message, Toast.LENGTH_SHORT).show()
+                }
+                is UIState.ResultDisplay -> {
+                    Toast.makeText(context,"result : ${state.result}", Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -70,7 +77,7 @@ fun PrincipalScreen(viewModel: CalculatorViewModel = viewModel()) {
         Column(modifier = Modifier.fillMaxHeight(),
             verticalArrangement = Arrangement.SpaceAround) {
 
-                PreviousOperationSurface()
+                PreviousOperationSurface(viewModel.oldResult, viewModel::onEvent)
             /*
                 Spacer(modifier = Modifier
                     .fillMaxWidth()
@@ -78,14 +85,14 @@ fun PrincipalScreen(viewModel: CalculatorViewModel = viewModel()) {
                 )
             */
 
-                ResultSurface(viewModel = viewModel)
+                ResultSurface(viewModel.uiState)
             /*
                 Spacer(modifier = Modifier
                     .fillMaxWidth()
                     .height(8.dp))
             */
 
-                OperationSurface(viewModel = viewModel)
+                OperationSurface(currentOperation)
             }
         }
 
@@ -96,27 +103,53 @@ fun PrincipalScreen(viewModel: CalculatorViewModel = viewModel()) {
         }
     }
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PreviousOperationSurface() {
-    Box(modifier = Modifier.fillMaxWidth(),
-        contentAlignment = Alignment.CenterEnd) {
+fun PreviousOperationSurface(oldResult: StateFlow<String>, onEvent: (UIEvent) -> Unit) {
 
-        Surface(modifier = Modifier.height(54.dp)
-            .padding(top = 16.dp, bottom = 16.dp, end = 8.dp),
-            shape = CircleShape,
-            color = MaterialTheme.colorScheme.surfaceVariant) {
+    val message by oldResult.collectAsState()
 
-            Text(modifier = Modifier.padding(start = 12.dp, end = 12.dp)
-                .wrapContentSize(align = Alignment.Center),
-                text = "Old Result",
-                textAlign = TextAlign.End,
-                color = MaterialTheme.colorScheme.onSurfaceVariant)
+    AnimatedVisibility(visible = message.isNotEmpty()) {
+
+        Box(
+            modifier = Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.CenterEnd
+        ) {
+
+            Surface(
+                modifier = Modifier
+                    .height(64.dp)
+                    .padding(top = 16.dp, bottom = 16.dp, end = 8.dp),
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                onClick = { onEvent(UIEvent.OldResultPressed(message)) }
+            ) {
+
+                Text(
+                    modifier = Modifier
+                        .padding(start = 16.dp, end = 16.dp)
+                        .wrapContentSize(align = Alignment.Center),
+                    text = message,
+                    textAlign = TextAlign.End,
+                    fontSize = 24.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
     }
+
 }
 
 @Composable
-fun ResultSurface(viewModel: CalculatorViewModel) {
+fun ResultSurface(uiState: StateFlow<UIState>) {
+
+    val state by uiState.collectAsState()
+    val message = when(state) {
+        is UIState.ResultDisplay -> (state as UIState.ResultDisplay).result
+        else -> ""
+    }
+
     Surface(modifier = Modifier
         .fillMaxWidth()
         .height(64.dp)
@@ -125,7 +158,7 @@ fun ResultSurface(viewModel: CalculatorViewModel) {
 
         Box(contentAlignment = Alignment.CenterEnd) {
             Text(modifier = Modifier.padding(start = 8.dp, end = 8.dp),
-                text = "Result",
+                text = message,
                 textAlign = TextAlign.End,
                 fontSize = 48.sp,
                 color = MaterialTheme.colorScheme.onSurface)
@@ -134,7 +167,8 @@ fun ResultSurface(viewModel: CalculatorViewModel) {
 }
 
 @Composable
-fun OperationSurface(viewModel: CalculatorViewModel) {
+fun OperationSurface(operation : String) {
+
     Surface(modifier = Modifier
         .fillMaxWidth()
         .height(52.dp)
@@ -143,7 +177,7 @@ fun OperationSurface(viewModel: CalculatorViewModel) {
 
         Box(modifier = Modifier.fillMaxHeight(), contentAlignment = Alignment.CenterEnd) {
             Text(modifier = Modifier.padding(start = 8.dp, end = 8.dp),
-                text = "1000 + 323",
+                text = operation,
                 fontSize = 32.sp,
                 textAlign = TextAlign.End,
                 color = MaterialTheme.colorScheme.onSurfaceVariant)
